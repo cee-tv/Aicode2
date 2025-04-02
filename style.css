@@ -1,5 +1,4 @@
 /* Master style sheet that imports all other CSS files */
-@import 'terminal-theme.css';
 @import 'base.css';
 @import 'layout.css';
 @import 'mode-styles.css';
@@ -7,3 +6,4 @@
 @import 'buttons.css';
 @import 'output.css';
 @import 'responsive.css';
+
