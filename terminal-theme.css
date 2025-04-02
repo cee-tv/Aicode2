@@ -1,0 +1,153 @@
+/* Cyberpunk-inspired terminal theme */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #121212;
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.container {
+    width: 90%;
+    max-width: 700px;
+    background-color: #1e1e1e;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    border: 1px solid #30ff30;
+}
+
+.output {
+    padding: 20px;
+    background-color: #1e1e1e;
+    color: #fff;
+    overflow-x: auto;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
+.output pre {
+    margin-top: 10px;
+    font-family: 'Fira Code', monospace;
+    white-space: pre-wrap;
+}
+
+.output pre code {
+    font-size: 14px;
+}
+
+button {
+    background-color: #30ff30;
+    color: #121212;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #32ff32;
+}
+
+label {
+    display: block;
+    margin-bottom: 10px;
+    color: #fff;
+}
+
+select, textarea {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    background-color: #2f2f2f;
+    color: #fff;
+}
+
+select:focus, textarea:focus {
+    outline: none;
+    border: 1px solid #30ff30;
+    box-shadow: 0 0 0 2px rgba(48, 255, 48, 0.5);
+}
+
+textarea {
+    resize: vertical;
+}
+
+input[type="checkbox"] {
+    accent-color: #30ff30;
+}
+
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.checkbox-group label {
+    margin-bottom: 0;
+}
+
+.copy-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #2f2f2f;
+    color: #fff;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.copy-button:hover {
+    background-color: #3f3f3f;
+}
+
+.run-code-button {
+    display: block;
+    width: auto;
+    margin: 10px auto 0;
+    padding: 6px 12px;
+    background-color: #2f2f2f;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.run-code-button:hover {
+    background-color: #3f3f3f;
+}
+
+.score {
+    font-size: 2em;
+    font-weight: bold;
+    text-align: center;
+    margin: 20px 0;
+    padding: 10px;
+    border-radius: 8px;
+}
+
+.score.high {
+    color: #30ff30;
+    background-color: rgba(48, 255, 48, 0.2);
+}
+
+.score.medium {
+    color: #ffff30;
+    background-color: rgba(255, 255, 48, 0.2);
+}
+
+.score.low {
+    color: #ff3030;
+    background-color: rgba(255, 48, 48, 0.2);
+}
