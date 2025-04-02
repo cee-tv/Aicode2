@@ -1,0 +1,7 @@
+<example>
+{
+  "optimizedCode": "function example() {...}",
+  "summary": "Optimizations made..."
+}
+</example>
+
