@@ -1,6 +1,72 @@
-import hljs from 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/es/highlight.min.js';
+export function escapeHtml(unsafe) {
+  return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
 
-// Handle displaying the result in the output area
+// Add copy button to code blocks
+function addCopyButton(preElement, textToCopy) {
+  if (!preElement) return;
+  
+  // Remove existing copy button if any
+  const existingButton = preElement.querySelector('.copy-button');
+  if (existingButton) existingButton.remove();
+  
+  const copyButton = document.createElement('button');
+  copyButton.className = 'copy-button';
+  copyButton.textContent = 'Copy';
+  copyButton.addEventListener('click', () => {
+    navigator.clipboard.writeText(textToCopy).then(() => {
+      copyButton.textContent = 'Copied!';
+      copyButton.classList.add('copied');
+      setTimeout(() => {
+        copyButton.textContent = 'Copy';
+        copyButton.classList.remove('copied');
+      }, 2000);
+    });
+  });
+  
+  preElement.style.position = 'relative';
+  preElement.appendChild(copyButton);
+}
+
+// Add run button for HTML code
+function addRunButton(elements) {
+  const preElement = elements.output.querySelector('pre');
+  if (!preElement) return;
+  
+  const rawCode = decodeURIComponent(preElement.dataset.rawCode || '');
+  if (!rawCode) return;
+  
+  // Remove existing run button if any
+  const existingButton = elements.output.querySelector('.run-code-button');
+  if (existingButton) existingButton.remove();
+  
+  const runButton = document.createElement('button');
+  runButton.className = 'run-code-button';
+  runButton.textContent = 'Run Code';
+  runButton.addEventListener('click', () => {
+    // Remove existing iframe if any
+    const existingIframe = elements.output.querySelector('.run-iframe');
+    if (existingIframe) existingIframe.remove();
+    
+    const iframe = document.createElement('iframe');
+    iframe.srcdoc = rawCode;
+    iframe.className = 'run-iframe';
+    iframe.style.width = '100%';
+    iframe.style.height = '300px';
+    iframe.style.border = '1px solid #334155';
+    iframe.style.borderRadius = '8px';
+    iframe.style.marginTop = '20px';
+    elements.output.appendChild(iframe);
+  });
+  
+  preElement.appendChild(runButton);
+}
+
 export function displayResult(result, language, modeKey, elements) {
   if (modeKey === 'generator') {
     let codeContent = result;
@@ -8,34 +74,41 @@ export function displayResult(result, language, modeKey, elements) {
       codeContent = result.split('\n\n/*\nExplanation:')[0];
     }
     
-    if (language.includes("html_css_javascript")) {
+    if (language.includes("html_css_javascript_all_in_one_file")) {
       language = "html";
     }
     
     let modifiedResult = language.includes("html") ? escapeHtml(codeContent) : result;
-    if (language.includes("html")) {
+    const isHTMLOutput = language.includes("html");
+    
+    if (isHTMLOutput) {
       elements.output.innerHTML = `<pre data-raw-code="${encodeURIComponent(codeContent)}"><code class="language-${language}">${modifiedResult}</code></pre>`;
     } else {
       elements.output.innerHTML = `<pre><code class="language-${language}">${modifiedResult}</code></pre>`;
     }
+    
     hljs.highlightAll();
     addCopyButton(elements.output.querySelector('pre'), codeContent);
     
-    if (language.includes("html")) {
+    if (isHTMLOutput) {
       addRunButton(elements);
     }
   } else if (modeKey === 'converter') {
     let codeContent = result;
-    let modifiedResult = language.includes("html") ? escapeHtml(codeContent) : result;
-    if (language.includes("html")) {
-      elements.output.innerHTML = `<pre data-raw-code="${codeContent}"><code class="language-${elements.targetLanguage}">${modifiedResult}</code></pre>`;
-    } else {
-      elements.output.innerHTML = `<pre><code class="language-${elements.targetLanguage}">${modifiedResult}</code></pre>`;
-    }
+    const targetLanguage = elements.targetLanguage.value;
+    const isHtmlTarget = targetLanguage.includes("html");
+    let modifiedResult = isHtmlTarget ? escapeHtml(codeContent) : result;
+    
+    elements.output.innerHTML = `
+      <pre data-raw-code="${encodeURIComponent(codeContent)}">
+        <code class="language-${targetLanguage}">${modifiedResult}</code>
+      </pre>
+    `;
+    
     hljs.highlightAll();
     addCopyButton(elements.output.querySelector('pre'), codeContent);
 
-    if (language.includes("html")) {
+    if (isHtmlTarget) {
       addRunButton(elements);
     }
   } else {
@@ -46,90 +119,30 @@ export function displayResult(result, language, modeKey, elements) {
       hljs.highlightElement(codeBlock);
       const preBlock = codeBlock.parentElement;
       addCopyButton(preBlock, codeBlock.textContent);
-      if (language && language.includes("html")) {
-        addRunButtonForCodeBlock(preBlock, codeBlock.textContent);
+      
+      if (language && (language.includes("html") || language.includes("html_css_javascript_all_in_one_file"))) {
+        preBlock.style.position = 'relative';
+        const runButton = document.createElement('button');
+        runButton.className = 'run-code-button';
+        runButton.textContent = 'Run Code';
+        runButton.style.position = 'absolute';
+        runButton.style.bottom = '10px';
+        runButton.style.right = '10px';
+        runButton.addEventListener('click', () => {
+          const iframe = document.createElement('iframe');
+          iframe.srcdoc = codeBlock.textContent;
+          iframe.className = 'run-iframe';
+          iframe.style.width = '100%';
+          iframe.style.height = '300px';
+          preBlock.parentElement.appendChild(iframe);
+        });
+        preBlock.appendChild(runButton);
       }
     });
   }
-}
-
-// Add a run button for HTML code
-function addRunButton(elements) {
-  let preBlock = elements.output.querySelector('pre');
-  let runButton = document.createElement('button');
-  runButton.className = 'run-code-button';
-  runButton.textContent = 'Run Code (Review the above code first!)';
-  runButton.addEventListener('click', () => {
-    let rawCode = decodeURIComponent(preBlock.getAttribute('data-raw-code'));
-    let iframe = document.createElement('iframe');
-    iframe.srcdoc = rawCode;
-    iframe.className = 'run-iframe';
-    iframe.style.width = '100%';
-    iframe.style.height = '500px';
-    let oldIframe = elements.output.querySelector('iframe.run-iframe');
-    if (oldIframe) oldIframe.remove();
-    elements.output.appendChild(iframe);
-  });
-  elements.output.appendChild(runButton);
-}
-
-// Add a run button for HTML code blocks in reviewer/explainer modes
-function addRunButtonForCodeBlock(preBlock, codeContent) {
-  let runButton = document.createElement('button');
-  runButton.className = 'run-code-button';
-  runButton.textContent = 'Run Code';
-  runButton.addEventListener('click', () => {
-    let iframe = document.createElement('iframe');
-    iframe.srcdoc = codeContent;
-    iframe.className = 'run-iframe';
-    iframe.style.width = '100%';
-    iframe.style.height = '300px';
-    let oldIframe = preBlock.querySelector('iframe.run-iframe');
-    if (oldIframe) oldIframe.remove();
-    preBlock.parentElement.appendChild(iframe);
-  });
-  preBlock.appendChild(runButton);
-}
-
-// Add a copy button to code blocks
-export function addCopyButton(container, textToCopy) {
-  const copyButton = document.createElement('button');
-  copyButton.className = 'copy-button';
-  copyButton.textContent = 'Copy';
-
-  copyButton.addEventListener('click', async () => {
-    try {
-      await navigator.clipboard.writeText(textToCopy);
-      copyButton.textContent = 'Copied!';
-      copyButton.classList.add('copied');
-
-      setTimeout(() => {
-        copyButton.textContent = 'Copy';
-        copyButton.classList.remove('copied');
-      }, 2000);
-    } catch (err) {
-      console.error('Failed to copy text:', err);
-      copyButton.textContent = 'Failed to copy';
-
-      setTimeout(() => {
-        copyButton.textContent = 'Copy';
-      }, 2000);
-    }
-  });
-
-  container.style.position = 'relative';
-  copyButton.style.position = 'absolute';
-  copyButton.style.top = '-15px';
-  copyButton.style.right = '0px';
-  container.appendChild(copyButton);
-}
-
-// Escape HTML for safe rendering
-export function escapeHtml(unsafe) {
-  return unsafe
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
+  
+  return {
+    addCopyButton,
+    addRunButton
+  };
 }
