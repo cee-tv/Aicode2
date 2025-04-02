@@ -65,7 +65,15 @@ export const MODES = {
     title: "Converter",
     executeName: "Convert",
     loadingText: "Converting code...",
-    handler: convertCode,
+    handler: async (...params) => {
+      const result = await convertCode(...params);
+      // Combine code and explanation into HTML string
+      return `
+        ${result.explanation || 'Code converted successfully'}
+        <h3>Converted Code</h3>
+        <pre><code class="language-${params[1]}">${result.code}</code></pre>
+      `;
+    },
     options: ['tone', 'targetLanguage', 'includeExplanation'],
     parameters: (elements) => ([
       elements.language.value,
