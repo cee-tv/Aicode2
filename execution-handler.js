@@ -50,10 +50,20 @@ export async function handleExecute(elements) {
     }
     
     const result = await modeConfig.handler(...parameters);
-    displayResult(result, elements.language.value, modeKey, elements);
+    
+    // Check if result is a string - if it's an error object with rawResponse, use that
+    if (typeof result === 'object' && result.rawResponse) {
+      displayResult(result.rawResponse, elements.language.value, modeKey, elements);
+    } else {
+      displayResult(result, elements.language.value, modeKey, elements);
+    }
   } catch (error) {
     console.error("Error:", error);
-    elements.output.textContent = error.message || 'Error processing request. Please try again.';
+    if (error.rawResponse) {
+      displayResult(error.rawResponse, elements.language.value, modeKey, elements);
+    } else {
+      elements.output.textContent = error.message || "An error occurred. Please try again or modify your request.";
+    }
   } finally {
     elements.execute.classList.remove('loading');
   }
